@@ -89,4 +89,5 @@
     <plugin name="cordova-plugin-device" spec="~1.1.4" />
     <plugin name="cordova-plugin-chrome-apps-system-memory" spec="~1.1.1" />
     <plugin name="cordova-plugin-file" spec="~4.3.3" />
+    <plugin name="cordova-plugin-device-name" spec="~1.2.1" />
 </widget>

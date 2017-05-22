@@ -7,6 +7,11 @@
 <ion-header>
   <ion-navbar color="primary">
     <ion-title>Symphony Device</ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="refresh()">
+        <ion-icon name="refresh"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
@@ -15,13 +20,17 @@
   <ion-list>
     <ion-item>
       <ion-label stacked>Access Code</ion-label>
-      <ion-input type="text" placeholder="Access Code"></ion-input>
+      <ion-input type="text" placeholder="Access Code" [(ngModel)]="details.accesscode"></ion-input>
     </ion-item>
   </ion-list>
   <div padding>
     <button ion-button block (click)="validateKeys()">Validate</button>
   </div>
   <ion-list>
+    <ion-item>
+      <h2>Name</h2>
+      <ion-note item-end>{{details.name}}</ion-note>
+    </ion-item>
     <ion-item>
       <h2>UUID</h2>
       <ion-note item-end>{{details.UUID}}</ion-note>
@@ -74,12 +83,14 @@
       <h2>RAM</h2>
       <ion-note item-end>{{details.ram | fileSize}}</ion-note>
     </ion-item>
-     <ion-item>
+    <ion-item>
       <h2>Storage</h2>
       <ion-note item-end>{{details.storageSize | fileSize}}</ion-note>
     </ion-item>
   </ion-list>
   <div padding>
-    <button ion-button block (click)="refresh()">Refresh</button>
+    <button ion-button block (click)="connectApp()">Connect App</button>
+    <button ion-button block (click)="pingApp()" [disabled]="!isPingEnable">Ping</button>
+    <button ion-button block (click)="syncApp()">Sync App</button>
   </div>
 </ion-content>

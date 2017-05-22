@@ -1,6 +1,7 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { HttpModule} from '@angular/http';
 
 import { MyApp } from './app.component';
 
@@ -19,6 +20,7 @@ import { File } from '@ionic-native/file';
 
 
 import { FileSizePipe } from '../pipes/file-size/file-size';
+import { DeviceProvider } from '../providers/device/device';
 
 @NgModule({
   declarations: [
@@ -28,10 +30,11 @@ import { FileSizePipe } from '../pipes/file-size/file-size';
     HomePage,
     TabsPage,
     LoginPage,
-    FileSizePipe
+    FileSizePipe,
   ],
   imports: [
     BrowserModule,
+    HttpModule,
     IonicModule.forRoot(MyApp)
   ],
   bootstrap: [IonicApp],
@@ -41,7 +44,7 @@ import { FileSizePipe } from '../pipes/file-size/file-size';
     ContactPage,
     HomePage,
     TabsPage,
-    LoginPage,
+    LoginPage
   ],
   providers: [
     StatusBar,
@@ -50,7 +53,8 @@ import { FileSizePipe } from '../pipes/file-size/file-size';
     Device,
     Geolocation,
     AppVersion,
-    File
+    File,
+    DeviceProvider
   ]
 })
 export class AppModule {}
