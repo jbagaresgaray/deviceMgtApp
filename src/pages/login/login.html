@@ -89,8 +89,11 @@
     </ion-item>
   </ion-list>
   <div padding>
-    <button ion-button block (click)="connectApp()">Connect App</button>
-    <button ion-button block (click)="pingApp()" [disabled]="!isPingEnable">Ping</button>
+    <button ion-button block (click)="connectApp()" [disabled]="isConnected">Connect App</button>
+    <button ion-button block (click)="disconnectApp()" [disabled]="!isConnected">Disconnect App</button>
+
+    <!--<button ion-button block (click)="pingApp()" [disabled]="!isPingEnable">Ping</button>-->
+
     <button ion-button block (click)="syncApp()">Sync App</button>
   </div>
 </ion-content>

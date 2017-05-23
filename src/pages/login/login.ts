@@ -31,19 +31,41 @@ export class LoginPage {
   public details: any = {};
   public deviceObj: any = {};
   socket: any;
+
   appTimer: any;
-  isPingEnable:boolean = true;
+  appPingTimer: any;
+  appGeoTimer:any;
+
+  isPingEnable: boolean = true;
+  isConnected: boolean = false;
+  
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public platform: Platform, private device: Device, private geolocation: Geolocation,
     private appVersion: AppVersion, private zone: NgZone, private file: File, private deviceFctry: DeviceProvider, public toastr: ToastController) {
-    
+
     var SOCKET_URL = deviceFctry.apiUrl;
-    console.log('SOCKET_URL: ',SOCKET_URL);
+    console.log('SOCKET_URL: ', SOCKET_URL);
 
     this.socket = io(SOCKET_URL);
     this.socket.on('connect', (socket) => {
-      console.log('--socket.io ',socket);
+      console.log('--socket.io ', socket);
     });
+
+    this.socket.on('device:ping:respond',(device)=>{
+      console.log('device:ping:respond: ',device);
+    });
+
+    this.socket.on('devices',(device)=>{
+      console.log('devices: ',device);
+    });
+
+    this.socket.on('devices:app',(device)=>{
+      this.deviceObj = device;
+    });
+
+    this.geolocation.watchPosition((resp)=>{
+      console.log('watchPosition: ',resp);
+    })
 
     this.refresh();
   }
@@ -64,19 +86,19 @@ export class LoginPage {
     this.deviceObj.startTime = timeInMs;
 
     this.isPingEnable = false;
-    this.appTimer = setInterval(() => {
+    this.appPingTimer = setInterval(() => {
       console.log('device:ping:send: ', this.deviceObj);
       this.socket.emit('device:ping:send', this.deviceObj);
     }, 1000);
 
     setTimeout(() => {
       console.log('stop ping');
-      clearInterval(this.appTimer);
+      clearInterval(this.appPingTimer);
       this.isPingEnable = true;
     }, 5000);
   }
 
-  connectApp(){
+  connectApp() {
     this.deviceObj = {
       uuid: this.details.UUID,
       name: this.details.name,
@@ -92,16 +114,40 @@ export class LoginPage {
       buildVersion: this.details.versionNumber,
       latitude: this.details.latitude,
       longitude: this.details.longitude,
-      accesscode: this.details.accesscode,
-      isOnline: true
+      accesscode: this.details.accesscode
     };
 
-    console.log('deviceConnect: ', this.deviceObj);
-    this.socket.emit("deviceConnect", this.deviceObj);
+    this.isConnected = true;
+    
+    // this.appGeoTimer = setInterval(()=>{
+    //   this.geolocation.getCurrentPosition().then((resp) => {
+    //     let coords = resp.coords;
+    //     this.zone.runOutsideAngular(() => {
+    //       this.deviceObj.latitude = coords.latitude;
+    //       this.deviceObj.longitude = coords.longitude;
+    //     });
+    //   }).catch((error) => {
+    //     console.log('Error getting location', error);
+    //   });
+    // },5000);
+
+    this.appTimer = setInterval(() => {
+      this.socket.emit("deviceConnect", this.deviceObj);
+    }, 1000);
+  }
+
+  disconnectApp(){
+    this.isConnected = false;
+    clearInterval(this.appTimer);
+    clearInterval(this.appGeoTimer);
+    this.socket.emit('deviceDisconnect',this.deviceObj);
+  }
+
+  syncApp() {
+    console.log('This will save sync logs')
   }
 
   validateKeys() {
-    console.log('Device: ', this.details);
     this.deviceObj = {
       uuid: this.details.UUID,
       name: this.details.name,
@@ -120,7 +166,6 @@ export class LoginPage {
       accesscode: this.details.accesscode,
       isOnline: true
     };
-    console.log('Device 1: ', this.deviceObj);
 
     async.waterfall([
       (callback) => {
@@ -136,17 +181,26 @@ export class LoginPage {
             toast.present();
           }
         }).catch(err => {
-          var error = JSON.parse(err._body);
-          console.log('error: ', error)
-          if (error.statusCode == 400 && !error.response.success && _.isArray(error.response.result)) {
-            console.log('loop error')
-          }
+          console.log('err: ', err);
+          // var error = JSON.parse(err._body);
+          // console.log('error: ', error)
+          // if (error.statusCode == 400 && !error.response.success && _.isArray(error.response.result)) {
+          //   console.log('loop error')
+          // }
         });
       },
       (callback) => {
         this.deviceFctry.registerDevice(this.deviceObj).then((resp) => {
           if (resp.statusCode == 200 && resp.response.success) {
-            callback();
+            let toast = this.toastr.create({
+              message: resp.response.msg,
+              duration: 3000,
+              position: 'bottom'
+            });
+            toast.onDidDismiss(() => {
+              callback();
+            })
+            toast.present();
           } else {
             let toast = this.toastr.create({
               message: resp.response.msg,
@@ -156,11 +210,12 @@ export class LoginPage {
             toast.present();
           }
         }).catch(err => {
-          var error = JSON.parse(err._body);
-          console.log('error: ', error)
-          if (error.statusCode == 400 && !error.response.success && _.isArray(error.response.result)) {
-            console.log('loop error')
-          }
+          console.log('err: ', err);
+          // var error = JSON.parse(err._body);
+          // console.log('error: ', error)
+          // if (error.statusCode == 400 && !error.response.success && _.isArray(error.response.result)) {
+          //   console.log('loop error')
+          // }
         });
       }
     ]);
@@ -255,7 +310,7 @@ export class LoginPage {
             ctrl.details.storageSize = data;
           });
         });
-      }else{
+      } else {
         ctrl.details.name = window.navigator.appName;
         ctrl.details.appName = window.navigator.appName;
         ctrl.details.versionNumber = '0.0.1';
@@ -266,8 +321,6 @@ export class LoginPage {
     });
   }
 
-  syncApp() {
-    console.log('This will save sync logs')
-  }
+  
 
 }
