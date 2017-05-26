@@ -89,13 +89,13 @@ export class LoginPage {
     this.appPingTimer = setInterval(() => {
       console.log('device:ping:send: ', this.deviceObj);
       this.socket.emit('device:ping:send', this.deviceObj);
-    }, 1000);
+    }, 5000);
 
     setTimeout(() => {
       console.log('stop ping');
       clearInterval(this.appPingTimer);
       this.isPingEnable = true;
-    }, 5000);
+    }, 25000);
   }
 
   connectApp() {
@@ -133,7 +133,7 @@ export class LoginPage {
 
     this.appTimer = setInterval(() => {
       this.socket.emit("deviceConnect", this.deviceObj);
-    }, 1000);
+    }, 5000);
   }
 
   disconnectApp(){
