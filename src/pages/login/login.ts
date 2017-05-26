@@ -30,6 +30,7 @@ export class LoginPage {
   _platform: string;
   public details: any = {};
   public deviceObj: any = {};
+  public syncObj: any = {};
   socket: any;
 
   appTimer: any;
@@ -72,7 +73,7 @@ export class LoginPage {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad LoginPage');
-    this.details.accesscode = '958441082755103';
+    this.details.accesscode = '644249449446344';
   }
 
   ionViewDidLeave() {
@@ -145,6 +146,14 @@ export class LoginPage {
 
   syncApp() {
     console.log('This will save sync logs')
+    this.syncObj = {
+      sub_id: 27,
+      device_id:  this.details.UUID,
+      log_action_type: 0,
+      isp_name: this.details.name,
+      ip_address: null
+    }
+    this.socket.emit('deviceLogs',this.syncObj);
   }
 
   validateKeys() {
